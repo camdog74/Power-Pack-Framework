@@ -1,0 +1,22 @@
+{
+  "Name": "Power Pack Framework",
+  "Author": "Camdog74",
+  "Description": "The framework used to create power mods that use the power menu.",
+  "ModVersion": "1.0",
+  "GameVersion": "Everyone to use!",
+  "ThumbnailPath": "thumb.png",
+  "EntryPoint": "PPF.PPF",
+  "Tags": [
+    "Framework",
+    "Powers",
+    "Ui"
+  ],
+  "Scripts": [
+    "PowerManager.cs",
+    "PpfManager.cs",
+    "UiCreatingStuff.cs"
+  ],
+  "Active": true,
+  "UGCIdentity": null,
+  "CreatorUGCIdentity": "2506978276"
+}
