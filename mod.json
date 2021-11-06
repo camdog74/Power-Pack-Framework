@@ -14,7 +14,8 @@
   "Scripts": [
     "PowerManager.cs",
     "PpfManager.cs",
-    "UiCreatingStuff.cs"
+    "UiCreatingStuff.cs",
+    "CapeBuilding.cs"
   ],
   "Active": true,
   "UGCIdentity": null,
