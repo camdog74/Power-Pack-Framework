@@ -86,17 +86,6 @@ namespace PPF
             string Description = (string)Options[3];
             CycleSkinTextures.AddNewTexture(person, texture, SkinName, Description);
         }
-        public void AddCustomBodyPartToSkin(List<object> Options)
-        {
-            PersonBehaviour person = (PersonBehaviour)Options[0];
-            int BodyPart = (int)Options[1];
-            string SkinName = (string)Options[2];
-            Sprite Skin = (Sprite)Options[3];
-            Texture2D Flesh = (Texture2D)Options[4];
-            Texture2D Bone = (Texture2D)Options[5];
-
-            CycleSkinTextures.AddCustomBodyPartToExistingSkin(person,BodyPart, SkinName, Skin, Flesh, Bone);
-        }
 
         public void CustomLimb(List<object> Options)
         {
