@@ -373,7 +373,7 @@ namespace PPF
             if (secondTexture)
                 NewSkin.secondTexture = secondTexture;
             if (SecondTextureLimbs != null)
-                NewSkin.SecondTextureLimbs = SecondTextureLimbs;          
+                NewSkin.SecondTextureLimbs = SecondTextureLimbs;
             if (person.Limbs[0].GetComponent<CycleSkinTextures>() != null)
             {
                 foreach (var item in person.Limbs)
@@ -388,7 +388,7 @@ namespace PPF
                     var skinSystem = item.gameObject.AddComponent<CycleSkinTextures>();
 
 
-                    skinSystem.Textures.Add(new Skin() { SkinTexture = person.Limbs[0].SkinMaterialHandler.renderer.sprite.texture, Description = "Default"});
+                    skinSystem.Textures.Add(new Skin() { SkinTexture = person.Limbs[0].SkinMaterialHandler.renderer.sprite.texture, Description = "Default" });
                     skinSystem.Textures.Add(NewSkin);
                 }
             }
@@ -413,11 +413,11 @@ namespace PPF
     public class CustomLimbData
     {
         public int TargetLimb;
-        public Sprite OgSkin;
+        public Texture2D OgSkin;
         public Texture2D OgFlesh;
         public Texture2D OgBone;
 
-           public Sprite NewSkin;
+        public Sprite NewSkin;
         public Texture2D NewFlesh;
         public Texture2D NewBone;
     }
@@ -426,6 +426,7 @@ namespace PPF
     {
         //This is for people with sprites that go out of the games sprite boundarys.
 
+        
         public Sprite OgSkin;
         public Texture2D OgFlesh;
         public Texture2D OgBone;
@@ -433,14 +434,13 @@ namespace PPF
         public Sprite NewSkin;
         public Texture2D NewFlesh;
         public Texture2D NewBone;
-
+        int ThisLimb = 0;
         
         public void Start()
         {
-
-            OgSkin = GetComponent<LimbBehaviour>().SkinMaterialHandler.renderer.GetComponent<SpriteRenderer>().sprite;
-            OgFlesh = (Texture2D)GetComponent<LimbBehaviour>().SkinMaterialHandler.renderer.material.GetTexture("_FleshTex");
-            OgBone = (Texture2D)GetComponent<LimbBehaviour>().SkinMaterialHandler.renderer.material.GetTexture("_BoneTex");
+            OgSkin = GetComponent<SkinMaterialHandler>().renderer.sprite;
+            OgFlesh = (Texture2D)GetComponent<SkinMaterialHandler>().renderer.material.GetTexture("_FleshTex");
+            OgBone = (Texture2D)GetComponent<SkinMaterialHandler>().renderer.material.GetTexture("_BoneTex"); 
         }
         
         
@@ -450,17 +450,17 @@ namespace PPF
         //like the iron man suit and venom, so we can change to those skins.
         public void SetOriginalTextures()
         {
-            GetComponent<LimbBehaviour>().Person.Limbs[0].GetComponent<SpriteRenderer>().sprite = OgSkin;
-            GetComponent<LimbBehaviour>().Person.Limbs[0].GetComponent<SpriteRenderer>().material.SetTexture("_FleshTex", OgFlesh);
-            GetComponent<LimbBehaviour>().Person.Limbs[0].GetComponent<SpriteRenderer>().material.SetTexture("_BoneTex", OgBone);
+            GetComponent<LimbBehaviour>().GetComponent<SpriteRenderer>().sprite = OgSkin;
+            GetComponent<LimbBehaviour>().GetComponent<SpriteRenderer>().material.SetTexture("_FleshTex", OgFlesh);
+            GetComponent<LimbBehaviour>().GetComponent<SpriteRenderer>().material.SetTexture("_BoneTex", OgBone);
         }
 
         //This sets the body part to the new sprite
         public void SetNewTextures()
         {
-            GetComponent<LimbBehaviour>().Person.Limbs[0].GetComponent<SpriteRenderer>().sprite = NewSkin;
-            GetComponent<LimbBehaviour>().Person.Limbs[0].GetComponent<SpriteRenderer>().material.SetTexture("_FleshTex", NewFlesh);
-            GetComponent<LimbBehaviour>().Person.Limbs[0].GetComponent<SpriteRenderer>().material.SetTexture("_BoneTex", NewBone);
+            GetComponent<LimbBehaviour>().GetComponent<SpriteRenderer>().sprite = NewSkin;
+            GetComponent<LimbBehaviour>().GetComponent<SpriteRenderer>().material.SetTexture("_FleshTex", NewFlesh);
+            GetComponent<LimbBehaviour>().GetComponent<SpriteRenderer>().material.SetTexture("_BoneTex", NewBone);
         }
 
         public void SetactiveOrNot(List<object> Options)
