@@ -37,7 +37,6 @@ namespace PPF
             else if (monoBehaviour.gameObject.name == "Head" && Power[3] == "Head")
                 monoBehaviour.gameObject.GetComponent<LimbBehaviour>().Person.gameObject.GetComponent<PowerManager>().AddPower(Power, monoBehaviour.gameObject.GetComponent<LimbBehaviour>().Person.gameObject.GetComponent<PowerManager>().HeadPowers);
 
-            Debug.Log($"New power called {Power[2]} and is activated by {Power[3]}");
         }
 
         
@@ -250,7 +249,6 @@ namespace PPF
                                     }
                                     person.SetBodyTextures(Textures[SelectedSkin.transform.GetSiblingIndex()].SkinTexture);
 
-                                    Debug.Log(Textures[SelectedSkin.transform.GetSiblingIndex()].customLimbs.Count);
 
                                     if(Textures[SelectedSkin.transform.GetSiblingIndex()].customLimbs.Count > 0)
                                        {

@@ -144,7 +144,7 @@ namespace PPF
                             PowerButton.AddComponent<PowerButton>().Index = FakePowerList.IndexOf(item);
                             PowerButton.GetComponent<Button>().onClick.AddListener(new UnityAction(delegate { SelectPower(FakePowerList, PowerButton.GetComponent<PowerButton>().Index); }));
                         }
-                        else { PowerIndex = FakePowerList.IndexOf(item); Power = item; Debug.Log("G..ot one"); }
+                        else { PowerIndex = FakePowerList.IndexOf(item); Power = item; }
                     }
 
                     GameObject Equipped = UiCreatingStuff.CreateButton(AvailablePowersPanel, "None", new Vector3(1.2106e-06f, 38.5f, 0), new Vector2(17.9319f, 18.2409f));
