@@ -89,14 +89,23 @@ namespace PPF
                     JointAngleLimits2D limits = Rope.GetComponent<HingeJoint2D>().limits;
                     limits.min = 0;
                     limits.max = 360;
-                    Rope.GetComponent<HingeJoint2D>().limits = limits;
+                 //   Rope.GetComponent<HingeJoint2D>().limits = limits;
                     Rope.transform.SetParent(Ropes[i - 1].transform, true);
-                    if (i - 2 > -1)
-                    {
-                        Physics2D.IgnoreCollision(Ropes[i - 1].GetComponent<BoxCollider2D>(), Ropes[i - 2].GetComponent<BoxCollider2D>());
-                    }
                 }
                 else Rope.AddComponent<FixedJoint2D>().connectedBody = StartConnectedToo;
+
+                foreach (var item2 in Ropes)
+                {
+                    Physics2D.IgnoreCollision(item2.GetComponent<Collider2D>(), body.Person.Limbs[0].Collider);
+                    Physics2D.IgnoreCollision(item2.GetComponent<Collider2D>(), body.Person.Limbs[10].Collider);
+                    Physics2D.IgnoreCollision(item2.GetComponent<Collider2D>(), body.Person.Limbs[11].Collider);
+                    Physics2D.IgnoreCollision(item2.GetComponent<Collider2D>(), body.Person.Limbs[12].Collider);
+                    Physics2D.IgnoreCollision(item2.GetComponent<Collider2D>(), body.Person.Limbs[13].Collider);
+                    foreach (var item in Ropes)
+                    {
+                        Physics2D.IgnoreCollision(item2.GetComponent<Collider2D>(), item.GetComponent<Collider2D>());
+                    }
+                }
                 // Physics2D.IgnoreCollision(Rope.GetComponent<BoxCollider2D>(), ColliderGen);
                 Rope.SetLayer(ModAPI.FindSpawnable("Brick").Prefab.layer);
             }
