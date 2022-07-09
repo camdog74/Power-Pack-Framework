@@ -7,11 +7,12 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using System.Reflection;
+using System.Linq;
 namespace PPF
 {
     public class PPF
     {
-        public static void Main() 
+        public static void Main()
         {
             GameObject PowerPackFrameworkManager = new GameObject("PowerPackFrameworkManager");
             PowerPackFrameworkManager.AddComponent<PpfManager>();
@@ -19,7 +20,7 @@ namespace PPF
     }
 
     public class PpfManager : MonoBehaviour
-    {        
+    {
         public void AddNewPowerToMenu(List<object> Power)
         {
             MonoBehaviour monoBehaviour = (MonoBehaviour)Power[5];
@@ -39,7 +40,7 @@ namespace PPF
 
         }
 
-        
+
         public void CreateCape(List<object> Options)
         {
             PersonBehaviour person = (PersonBehaviour)Options[0];
@@ -55,9 +56,10 @@ namespace PPF
                 CapeBase.AddComponent<SpriteRenderer>().sprite = CapeBaseSprite;
                 CapeBase.GetComponent<SpriteRenderer>().sortingOrder = body.GetComponent<SpriteRenderer>().sortingOrder + 1;
             }
-            GameObject Rope = new GameObject();
+            GameObject Rope = new GameObject("PPF Cape");
             Rope.transform.position = body.transform.position;
-            Rope.AddComponent<RopeyRopenson>().CreateRope(body.transform.TransformPoint(body.transform.localPosition + new Vector3(-0.175f, -0.24f, 0)), 20,CapeThickness, body.GetComponent<Rigidbody2D>(), CapeTexture, body);
+            Rope.AddComponent<RopeyRopenson>().CreateRope(body.transform.TransformPoint(body.transform.localPosition + new Vector3(-0.175f, -0.24f, 0)), 20, CapeThickness, body.GetComponent<Rigidbody2D>(), CapeTexture, body);
+            Rope.GetComponent<RopeyRopenson>().CapeBase = CapeBase;
             Rope.transform.SetParent(body.transform);
         }
 
@@ -86,6 +88,41 @@ namespace PPF
             CycleSkinTextures.AddNewTexture(person, texture, SkinName, Description);
         }
 
+        public void AddCustomLimbToSkin(List<object> Options)
+        {
+            PersonBehaviour person = (PersonBehaviour)Options[0];
+            int targetLimb = (int)Options[1];
+            string SkinName = (string)Options[2];
+            Sprite limbSkin = (Sprite)Options[3];
+            Texture2D limbFlesh = (Texture2D)Options[4];
+            Texture2D limbBone = (Texture2D)Options[5];
+            AddCustomLimbToSkinPpf(person, targetLimb, SkinName, limbSkin, limbFlesh, limbBone);
+        }
+
+        public void SetSkinEvent(List<object> Options)
+        {
+            PersonBehaviour person = (PersonBehaviour)Options[0];
+            string SkinName = (string)Options[1];
+            UnityAction unityAction = (UnityAction)Options[2];
+            UnityAction unityAction2 = (UnityAction)Options[3];
+            SetSkinEventPpf(person, SkinName, unityAction,unityAction2);
+        }
+
+        public void SetSkinEventPpf(PersonBehaviour person, string SkinName, UnityAction SelectUnityAction, UnityAction DeselectUnityAction = null)
+        {
+            foreach (var item in person.GetComponentsInChildren<CycleSkinTextures>())
+            {
+                if (item.Textures.Where(x => x.SkinName == SkinName).First() != null)
+                {
+                    item.Textures.Where(x => x.SkinName == SkinName).First().SkinSelectionEvent = SelectUnityAction;
+                    if(DeselectUnityAction != null)
+                    {
+                        item.Textures.Where(x => x.SkinName == SkinName).First().SkinDeselectionEvent = DeselectUnityAction;
+                    }
+                }
+            }
+        }
+
         public void CustomLimb(List<object> Options)
         {
             LimbBehaviour BodyPart = (LimbBehaviour)Options[0];
@@ -93,13 +130,30 @@ namespace PPF
             Texture2D Flesh = (Texture2D)Options[2];
             Texture2D Bone = (Texture2D)Options[3];
 
-            if(!BodyPart.gameObject.GetComponent<CustomBodyPart>())
+            if (!BodyPart.gameObject.GetComponent<CustomBodyPart>())
                 BodyPart.gameObject.AddComponent<CustomBodyPart>();
             BodyPart.gameObject.GetComponent<CustomBodyPart>().NewSkin = Skin;
             BodyPart.gameObject.GetComponent<CustomBodyPart>().NewFlesh = Flesh;
             BodyPart.gameObject.GetComponent<CustomBodyPart>().NewBone = Bone;
             BodyPart.gameObject.GetComponent<CustomBodyPart>().SetNewTextures();
 
+        }
+
+        public void AddCustomLimbToSkinPpf(PersonBehaviour person, int TargetLimb, string SkinName, Sprite LimbSkin, Texture2D LimbFlesh, Texture2D LimbBone)
+        {
+            LimbBehaviour head = person.Limbs[TargetLimb];
+            if (!head.gameObject.GetComponent<CustomBodyPart>())
+                head.gameObject.AddComponent<CustomBodyPart>();
+
+            CustomLimbData NewLimb = new CustomLimbData() { NewSkin = LimbSkin, NewFlesh = LimbFlesh, NewBone = LimbBone, TargetLimb = TargetLimb };
+
+            foreach (var item in person.GetComponentsInChildren<CycleSkinTextures>())
+            {
+                if (item.Textures.Where(x => x.SkinName == SkinName).First() != null)
+                {
+                    item.Textures.Where(x => x.SkinName == SkinName).First().customLimbs.Add(NewLimb);
+                }
+            }
         }
 
     }
@@ -114,13 +168,15 @@ namespace PPF
             public Texture2D secondTexture;
             public string[] SecondTextureLimbs;
             public List<CustomLimbData> customLimbs = new List<CustomLimbData>();
+            public UnityAction SkinSelectionEvent = null;
+            public UnityAction SkinDeselectionEvent = null;
         }
         public List<Skin> Textures = new List<Skin>();
         int CurrentIndex = 0;
         public PersonBehaviour person;
         public bool CanSwitch = true;
         GameObject SelectedSkin;
-        ContextMenuButton menuButton;   
+        ContextMenuButton menuButton;
         public void Start()
         {
             foreach (var item in GetComponent<LimbBehaviour>().Person.Limbs)
@@ -130,7 +186,7 @@ namespace PPF
                     item.gameObject.AddComponent<CustomBodyPart>();
                 }
             }
-            
+
             if (GetComponent<LimbBehaviour>() && !person)
                 person = GetComponent<LimbBehaviour>().Person;
             GetComponent<PhysicalBehaviour>().ContextMenuOptions.Buttons.Add(menuButton = new ContextMenuButton("ChangeSkin", "Change Skin", "Change Skin", new UnityAction[1]
@@ -242,52 +298,53 @@ namespace PPF
                 if (SelectedSkin)
                 {
                     {
+                                    if(Textures[CurrentIndex].SkinDeselectionEvent != null)
+                                    {
+                                        Textures[CurrentIndex].SkinDeselectionEvent.Invoke();
+                                    }
+
                                     foreach (var item in person.Limbs)
-                                    {
-                                        if(item.gameObject.GetComponent<CustomBodyPart>() && Textures[SelectedSkin.transform.GetSiblingIndex()].customLimbs.Count == 0)
-                                            item.gameObject.GetComponent<CustomBodyPart>().SetOriginalTextures();
-                                    }
-                                    person.SetBodyTextures(Textures[SelectedSkin.transform.GetSiblingIndex()].SkinTexture);
+                      {
+                          if(item.gameObject.GetComponent<CustomBodyPart>())
+                              item.gameObject.GetComponent<CustomBodyPart>().SetOriginalTextures();
+                      }
+
+                     person.SetBodyTextures(Textures[SelectedSkin.transform.GetSiblingIndex()].SkinTexture);
 
 
-                                    if(Textures[SelectedSkin.transform.GetSiblingIndex()].customLimbs.Count > 0)
-                                       {
-                                        
-                                        foreach (var item in Textures[SelectedSkin.transform.GetSiblingIndex()].customLimbs)
-                                           {
-                                            if (GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>())
-                                            {
-                                                GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().NewSkin = item.NewSkin;
-                                                GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().NewFlesh = item.NewFlesh;
-                                                GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().NewBone = item.NewBone;
-                                                GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().SetNewTextures();
-                                            }
-                                            else
-                                            {
-                                                GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.AddComponent<CustomBodyPart>();
-                                                GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().NewSkin = item.NewSkin;
-                                                GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().NewFlesh = item.NewFlesh;
-                                                GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().NewBone = item.NewBone;
-                                                GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().SetNewTextures();
-                                            }
-	                                       }
-                                        }
-                        if (Textures[SelectedSkin.transform.GetSiblingIndex()].secondTexture)
-                        {
 
-                                 foreach (var body in person.Limbs)
-                            {
-                                foreach (var item in Textures[SelectedSkin.transform.GetSiblingIndex()].SecondTextureLimbs)
-                                {
-                                              if (body.gameObject.name == item)
-                                    {
-                                            //       OtherStuff.SetBodyPartTexture(body, Textures[SelectedSkin.transform.GetSiblingIndex()].secondTexture);
-                                    }
-                                }
-                            }
+                     if(Textures[SelectedSkin.transform.GetSiblingIndex()].customLimbs.Count > 0)
+                       {
+
+                          foreach (var item in Textures[SelectedSkin.transform.GetSiblingIndex()].customLimbs)
+                          {
+                           if (!GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>())
+                           {
+                           GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.AddComponent<CustomBodyPart>();
+                           }
+                               GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().NewSkin = item.NewSkin;
+                               GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().NewFlesh = item.NewFlesh;
+                               GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().NewBone = item.NewBone;
+                                       //     StartCoroutine(SetLimbs(GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>()));
+                               GetComponent<LimbBehaviour>().Person.Limbs[item.TargetLimb].gameObject.GetComponent<CustomBodyPart>().SetNewTextures();
+                          }
+                       }
 
 
-                        }
+
+                     if(Textures[SelectedSkin.transform.GetSiblingIndex()].SkinSelectionEvent != null)
+                       {
+                           Textures[SelectedSkin.transform.GetSiblingIndex()].SkinSelectionEvent.Invoke();
+                       }
+
+
+
+                     foreach (var SkinSelector in person.GetComponentsInChildren<CycleSkinTextures>())
+                     {
+                      SkinSelector.CurrentIndex = SelectedSkin.transform.GetSiblingIndex();
+                     }
+
+
                     }
                     Destroy(panel.gameObject);
                     Destroy(SkinList);
@@ -360,7 +417,7 @@ namespace PPF
                  }));
         }
 
-        public static void AddNewTexture(PersonBehaviour person,Texture2D texture,string SkinName, string Description = null, Texture2D secondTexture = null, string[] SecondTextureLimbs = null)
+        public static void AddNewTexture(PersonBehaviour person, Texture2D texture, string SkinName, string Description = null, Texture2D secondTexture = null, string[] SecondTextureLimbs = null)
         {
             CycleSkinTextures skinTextures;
             Skin NewSkin = new Skin();
@@ -386,13 +443,18 @@ namespace PPF
                     var skinSystem = item.gameObject.AddComponent<CycleSkinTextures>();
 
 
-                    skinSystem.Textures.Add(new Skin() { SkinTexture = person.Limbs[0].SkinMaterialHandler.renderer.sprite.texture, Description = "Default" });
+                    skinSystem.Textures.Add(new Skin() { SkinTexture = person.Limbs[0].SkinMaterialHandler.renderer.sprite.texture, Description = "Default", SkinName = "Default" });
                     skinSystem.Textures.Add(NewSkin);
                 }
             }
         }
 
-        public static void AddCustomBodyPartToExistingSkin(PersonBehaviour person, int TargetLimb,string SkinName, Sprite Skin, Texture2D Flesh, Texture2D Bone)
+        public static IEnumerator SetLimbs(CustomBodyPart customBodyPart)
+        {
+            yield return new WaitForSeconds(2);
+            customBodyPart.SetNewTextures();
+        }
+        public static void AddCustomBodyPartToExistingSkin(PersonBehaviour person, int TargetLimb, string SkinName, Sprite Skin, Texture2D Flesh, Texture2D Bone)
         {
             if (person.Limbs[TargetLimb].GetComponent<CycleSkinTextures>() && person.Limbs[TargetLimb].GetComponent<CycleSkinTextures>().Textures.Where(x => x.SkinName == SkinName).Count() > 0)
             {
@@ -400,7 +462,7 @@ namespace PPF
                 foreach (var item in person.Limbs)
                 {
                     if (item.GetComponent<CycleSkinTextures>() && item.GetComponent<CycleSkinTextures>().Textures.Count > 1)
-                        skinItem.First().customLimbs.Add(new CustomLimbData() { TargetLimb = TargetLimb, NewSkin = Skin, NewFlesh = Flesh, NewBone = Bone});
+                        skinItem.First().customLimbs.Add(new CustomLimbData() { TargetLimb = TargetLimb, NewSkin = Skin, NewFlesh = Flesh, NewBone = Bone });
                     if (item.GetComponent<CycleSkinTextures>())
                         skinItem.First().customLimbs.Add(new CustomLimbData() { TargetLimb = TargetLimb, NewSkin = Skin, NewFlesh = Flesh, NewBone = Bone });
                 }
@@ -424,7 +486,8 @@ namespace PPF
     {
         //This is for people with sprites that go out of the games sprite boundarys.
 
-        
+
+
         public Sprite OgSkin;
         public Texture2D OgFlesh;
         public Texture2D OgBone;
@@ -433,17 +496,17 @@ namespace PPF
         public Texture2D NewFlesh;
         public Texture2D NewBone;
         int ThisLimb = 0;
-        
-        public void Start()
+
+        public void Awake()
         {
             OgSkin = GetComponent<SkinMaterialHandler>().renderer.sprite;
             OgFlesh = (Texture2D)GetComponent<SkinMaterialHandler>().renderer.material.GetTexture("_FleshTex");
-            OgBone = (Texture2D)GetComponent<SkinMaterialHandler>().renderer.material.GetTexture("_BoneTex"); 
+            OgBone = (Texture2D)GetComponent<SkinMaterialHandler>().renderer.material.GetTexture("_BoneTex");
         }
-        
-        
-        
-        
+
+
+
+
         //This sets the sprite back to the orignal skin that isn't custom, we use this for stuff
         //like the iron man suit and venom, so we can change to those skins.
         public void SetOriginalTextures()
@@ -475,6 +538,7 @@ namespace PPF
             }
         }
     }
+
 
 
 

@@ -15,6 +15,7 @@ namespace PPF
         public List<GameObject> Ropes = new List<GameObject>();
         public LineRenderer renderer;
         public EdgeCollider2D ColliderGen;
+        public GameObject CapeBase;
         ContextMenuButton menuButton;
         Vector3 lastPos;
         int LastAmount;
@@ -33,13 +34,15 @@ namespace PPF
         private void OnEnable()
         {
             //    if (renderer)
-            Application.onBeforeRender += RenderLines;
+            //     Application.onBeforeRender += RenderLines;
+            CapeBase.SetActive(true);
         }
 
         private void OnDisable()
         {
             //    if (renderer)
-            Application.onBeforeRender -= RenderLines;
+            //   Application.onBeforeRender -= RenderLines;
+            CapeBase.SetActive(false);
         }
 
 
@@ -137,10 +140,17 @@ namespace PPF
         {
             foreach (var item in Ropes)
             {
-                Application.onBeforeRender -= RenderLines;
+              //  Application.onBeforeRender -= RenderLines;
                 Destroy(renderer);
                 Destroy(item);
             }
+
+            Destroy(CapeBase);
+        }
+
+        void Update()
+        {
+            RenderLines();
         }
     }
 }
