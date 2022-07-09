@@ -149,9 +149,18 @@ namespace PPF
 
             foreach (var item in person.GetComponentsInChildren<CycleSkinTextures>())
             {
-                if (item.Textures.Where(x => x.SkinName == SkinName).First() != null)
+                var FirstSkin = item.Textures.Where(x => x.SkinName == SkinName).First();
+                if (FirstSkin != null)
                 {
-                    item.Textures.Where(x => x.SkinName == SkinName).First().customLimbs.Add(NewLimb);
+                    FirstSkin.customLimbs.Add(NewLimb);
+                }
+
+                if (item.CurrentIndex == item.Textures.IndexOf(FirstSkin))
+                {
+                    item.gameObject.GetComponent<CustomBodyPart>().NewSkin = LimbSkin;
+                    item.gameObject.GetComponent<CustomBodyPart>().NewFlesh = LimbFlesh;
+                    item.gameObject.GetComponent<CustomBodyPart>().NewBone = LimbBone;
+                    item.gameObject.GetComponent<CustomBodyPart>().SetNewTextures();
                 }
             }
         }
@@ -172,7 +181,7 @@ namespace PPF
             public UnityAction SkinDeselectionEvent = null;
         }
         public List<Skin> Textures = new List<Skin>();
-        int CurrentIndex = 0;
+        public int CurrentIndex = 0;
         public PersonBehaviour person;
         public bool CanSwitch = true;
         GameObject SelectedSkin;
