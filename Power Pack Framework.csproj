@@ -290,6 +290,7 @@
   <ItemGroup>
     <Compile Include="CapeBuilding.cs" />
     <Compile Include="PowerManager.cs" />
+    <Compile Include="PowerPackFrameworkFunctions.cs" />
     <Compile Include="PpfManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UiCreatingStuff.cs" />
