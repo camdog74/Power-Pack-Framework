@@ -4,7 +4,7 @@
   "Description": "The framework used to create power mods that use the power menu.",
   "ModVersion": "1.0",
   "GameVersion": "Everyone to use!",
-  "ThumbnailPath": "thumb.png",
+  "ThumbnailPath": "thumb.jpg",
   "EntryPoint": "PPF.PPF",
   "Tags": [
     "Framework",
